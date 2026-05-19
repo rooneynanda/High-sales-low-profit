@@ -1,0 +1,43 @@
+--Total gross revenue by product
+select product_name,
+sum(gross_revenue) as Total_gross_revenue
+from sales_transactions
+group by product_name
+order by Total_gross_revenue desc
+
+--Total Net revenue by product
+select product_name,
+sum(net_revenue) as Total_net_revenue
+from sales_transactions
+group by product_name
+order by Total_net_revenue desc
+
+
+--Total units sold by product
+select product_name,
+sum(units_sold) as total_units_sold
+from sales_transactions
+group by product_name
+order by total_units_sold desc
+
+--Profit Leak Diagnostic Tool
+select product_name,category,
+       count(transaction_id) as total_discounted_transactions,
+	   sum(units_sold) as total_units_sold,
+	   ROUND(avg(units_sold),2) as avg_transaction_size,
+	   ROUND(sum(net_revenue),2) as total_net_revenue,	   
+       ROUND(AVG(promo_discount_rate)*100,2) as Avg_discount_given
+from sales_transactions
+where promo_discount_rate >=0.30
+group by product_name,category
+order by total_net_revenue desc	
+
+--The Express Freight Leak Audit
+select category,count(transaction_id) as air_express_transaction,
+sum(units_sold) as Total_Units_Shipped_Air,
+sum(shipping_cost) as total_Air_freight_cost,
+RANK() OVER( order by sum (shipping_cost) desc) as rnk
+from sales_transactions
+where shipping_mode = 'Express Air'
+group by category
+order by total_air_freight_cost desc
